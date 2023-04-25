@@ -1,3 +1,6 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
 val kotlin_version: String = "1.8.20"
 
 plugins {
@@ -15,10 +18,16 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-//    testImplementation( )"org.junit.jupiter:junit-jupiter:5.7.0")
+    testImplementation(kotlin("test"))
+//    testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
 }
 
 tasks.test {
     useJUnitPlatform()
+    testLogging {
+        exceptionFormat = TestExceptionFormat.FULL
+        events = mutableSetOf(TestLogEvent.FAILED)
+        showStandardStreams = true
+    }
 }
+
