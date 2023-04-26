@@ -34,7 +34,6 @@ data class Player(val name: String, var wasInPenaltyBox: Boolean = false, var co
     }
 
     fun takeTurn(die: Random) {
-
         val placeRoll = die.nextInt(5) + 1
         val answerRoll = die.nextInt(9)
         val answerIsCorrect = answerRoll != 7
@@ -42,24 +41,14 @@ data class Player(val name: String, var wasInPenaltyBox: Boolean = false, var co
         val leavesPenaltyBox = wasInPenaltyBox && canLeavePenaltyBox
         val staysInPenaltyBox = wasInPenaltyBox && !canLeavePenaltyBox
 
-//        println("$name is the current player")
-//        println("They have rolled a $placeRoll")
+        if (!staysInPenaltyBox) {
+            calculateAndSetPlace(placeRoll)
 
-//        if (staysInPenaltyBox) {
-//            println("$name is not getting out of the penalty box")
-//            if(!answerIsCorrect) {
-//                println("Question was incorrectly answered")
-//                println("$name was sent to the penalty box")
-//            }
-//            return
-//        }
-
-        calculateAndSetPlace(placeRoll)
-
-        if (answerIsCorrect) {
-            coins++
-        } else {
-            wasInPenaltyBox = true
+            if (answerIsCorrect) {
+                coins++
+            } else {
+                wasInPenaltyBox = true
+            }
         }
 
         println(buildTurnSummary(answerIsCorrect, leavesPenaltyBox, staysInPenaltyBox, placeRoll))
@@ -81,7 +70,7 @@ data class Player(val name: String, var wasInPenaltyBox: Boolean = false, var co
                 summary += "\nQuestion was incorrectly answered"
                 summary += "\n$name was sent to the penalty box"
             }
-            return summary
+            return summary.trimStart()
         }
         if (leftPenaltyBox) {
             summary += "\n$name is getting out of the penalty box"
@@ -97,7 +86,8 @@ data class Player(val name: String, var wasInPenaltyBox: Boolean = false, var co
             summary += "\nQuestion was incorrectly answered" +
                     "\n$name was sent to the penalty box"
         }
-        return summary
+
+        return summary.trimStart()
     }
 }
 
