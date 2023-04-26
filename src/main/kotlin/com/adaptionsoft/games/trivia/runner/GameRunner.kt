@@ -12,7 +12,6 @@ fun main(args: Array<String>) {
     game.addPlayer(Player("Pat"))
     game.addPlayer(Player("Sue"))
 
-
-    while (game.takeTurn()){}
+    game.run()
 }
 
