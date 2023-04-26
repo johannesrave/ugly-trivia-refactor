@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Disabled
 import java.io.File
 import java.io.PrintStream
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class GoldenMasterTest {
@@ -40,6 +41,8 @@ class GoldenMasterTest {
             val masterLines = File(masterName).readLines()
             val testResultLines = File(testResultName).readLines()
 
+
+            assertEquals(masterLines.size, testResultLines.size, "Size mismatch in file $randomSeed")
             masterLines.forEachIndexed { lineIndex, _ ->
                 if (masterLines[lineIndex] == testResultLines[lineIndex]) return@forEachIndexed
 

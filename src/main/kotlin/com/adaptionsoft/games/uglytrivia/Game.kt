@@ -28,8 +28,8 @@ class Game(private val die: Random = Random()) {
     }
 }
 
-data class Player(val name: String, var isInPenaltyBox: Boolean = false, var coins: Int = 0, var place: Int = 0) {
-    fun calculateAndSetPlace(roll: Int) {
+data class Player(val name: String, var wasInPenaltyBox: Boolean = false, var coins: Int = 0, var place: Int = 0) {
+    private fun calculateAndSetPlace(roll: Int) {
         place = (place + roll) % 12
     }
 
@@ -37,56 +37,67 @@ data class Player(val name: String, var isInPenaltyBox: Boolean = false, var coi
 
         val placeRoll = die.nextInt(5) + 1
         val answerRoll = die.nextInt(9)
-        val answerIsIncorrect = answerRoll == 7
-        val staysInPenaltyBox = placeRoll % 2 == 0
+        val answerIsCorrect = answerRoll != 7
+        val canLeavePenaltyBox = placeRoll % 2 != 0
+        val leavesPenaltyBox = wasInPenaltyBox && canLeavePenaltyBox
+        val staysInPenaltyBox = wasInPenaltyBox && !canLeavePenaltyBox
 
-        println("$name is the current player")
-        println("They have rolled a $placeRoll")
+//        println("$name is the current player")
+//        println("They have rolled a $placeRoll")
 
-        if (isInPenaltyBox && staysInPenaltyBox && answerIsIncorrect) {
-            println("$name is not getting out of the penalty box")
-            println("Question was incorrectly answered")
-            println("$name was sent to the penalty box")
-            return
-        } else if (isInPenaltyBox && staysInPenaltyBox) {
-            println("$name is not getting out of the penalty box")
-            return
-        } else if (isInPenaltyBox) {
-            println("$name is getting out of the penalty box")
-        }
+//        if (staysInPenaltyBox) {
+//            println("$name is not getting out of the penalty box")
+//            if(!answerIsCorrect) {
+//                println("Question was incorrectly answered")
+//                println("$name was sent to the penalty box")
+//            }
+//            return
+//        }
 
         calculateAndSetPlace(placeRoll)
 
-        println("$name's new location is $place")
-        println("The category is ${Category.countOffByPlace(place)}")
-        println(Category.nextQuestionByPlace(place))
-
-        if (answerIsIncorrect) {
-
-            isInPenaltyBox = true
-
-//            return
-        } else {
+        if (answerIsCorrect) {
             coins++
+        } else {
+            wasInPenaltyBox = true
         }
 
-
-        // preserve bug to match with golden master
-//        println()
-//        println("$name now has $coins Gold Coins.")
-
-        println(buildTurnSummary(answerIsIncorrect))
+        println(buildTurnSummary(answerIsCorrect, leavesPenaltyBox, staysInPenaltyBox, placeRoll))
         return
     }
 
-    private fun buildTurnSummary(answerIsIncorrect: Boolean): String {
-        if (answerIsIncorrect) {
-            return "Question was incorrectly answered\n" +
-                    "$name was sent to the penalty box"
-        }
+    private fun buildTurnSummary(
+        answerIsCorrect: Boolean,
+        leftPenaltyBox: Boolean,
+        staysInPenaltyBox: Boolean,
+        placeRoll: Int
+    ): String {
+        var summary = "$name is the current player" +
+                "\nThey have rolled a $placeRoll"
 
-        return "Answer was ${if (isInPenaltyBox) "correct" else "corrent"}!!!!\n" +
-                "$name now has $coins Gold Coins."
+        if (staysInPenaltyBox) {
+            summary += "\n$name is not getting out of the penalty box"
+            if (!answerIsCorrect) {
+                summary += "\nQuestion was incorrectly answered"
+                summary += "\n$name was sent to the penalty box"
+            }
+            return summary
+        }
+        if (leftPenaltyBox) {
+            summary += "\n$name is getting out of the penalty box"
+        }
+        summary += "\n$name's new location is $place" +
+                "\nThe category is ${Category.countOffByPlace(place)}" +
+                "\n" + Category.nextQuestionByPlace(place)
+
+        if (answerIsCorrect) {
+            summary += "\nAnswer was ${if (wasInPenaltyBox) "correct" else "corrent"}!!!!" +
+                    "\n$name now has $coins Gold Coins."
+        } else {
+            summary += "\nQuestion was incorrectly answered" +
+                    "\n$name was sent to the penalty box"
+        }
+        return summary
     }
 }
 
