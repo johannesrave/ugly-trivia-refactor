@@ -2,79 +2,91 @@ package com.adaptionsoft.games.uglytrivia
 
 import java.util.*
 
-class Game {
+class Game(private val die: Random = Random()) {
     private var players = emptyList<Player>().toMutableList()
-    private var currentPlayerIndex = 0
-    private val die = Random()
+    private var currentPlayerIndex = -1
 
     fun run() {
         Category.reset()
 
-        while (makeTurn()) {
-        }
+        var player: Player
+        do {
+            player = getNextPlayer()
+            player.takeTurn(die)
+        } while (player.coins < 6)
     }
 
-    fun setDieSeed(seed: Long) {
-        die.setSeed(seed)
-    }
-
-    fun addPlayer(player: Player) {
-        players.add(player)
-        println("${player.name} was added")
-        println("They are player number ${players.size}")
-    }
-
-    private fun makeTurn(): Boolean {
-        val player = players[currentPlayerIndex]
+    private fun getNextPlayer(): Player {
         currentPlayerIndex = ++currentPlayerIndex % players.size
+        return players[currentPlayerIndex]
+    }
 
-        val placeRoll = die.nextInt(5) + 1
-        val answerRoll = die.nextInt(9)
-        val answerIsIncorrect = answerRoll == 7
-        val isGettingOutOfPenaltyBox = placeRoll % 2 != 0
-
-        println("${player.name} is the current player")
-        println("They have rolled a $placeRoll")
-
-        if (player.isInPenaltyBox && !isGettingOutOfPenaltyBox && answerIsIncorrect) {
-            println("${player.name} is not getting out of the penalty box")
-            println("Question was incorrectly answered")
-            println("${player.name} was sent to the penalty box")
-            return true
-        } else if (player.isInPenaltyBox && !isGettingOutOfPenaltyBox) {
-            println("${player.name} is not getting out of the penalty box")
-            return true
-        } else if (player.isInPenaltyBox) {
-            println("${player.name} is getting out of the penalty box")
-        }
-
-        player.calculateAndSetPlace(placeRoll)
-
-        println("${player.name}'s new location is ${player.place}")
-        println("The category is ${Category.countOffByPlace(player.place)}")
-        println(Category.nextQuestionByPlace(player.place))
-
-        if (answerIsIncorrect) {
-            println("Question was incorrectly answered")
-            println("${player.name} was sent to the penalty box")
-            player.isInPenaltyBox = true
-
-            return true
-        }
-
-
-        // preserve bug to match with golden master
-        println("Answer was ${if (player.isInPenaltyBox) "correct" else "corrent"}!!!!")
-        player.coins++
-        println("${player.name} now has ${player.coins} Gold Coins.")
-
-        return player.coins < 6
+    fun addPlayer(playerName: String) {
+        players.add(Player(playerName))
+        println("$playerName was added")
+        println("They are player number ${players.size}")
     }
 }
 
 data class Player(val name: String, var isInPenaltyBox: Boolean = false, var coins: Int = 0, var place: Int = 0) {
     fun calculateAndSetPlace(roll: Int) {
         place = (place + roll) % 12
+    }
+
+    fun takeTurn(die: Random) {
+
+        val placeRoll = die.nextInt(5) + 1
+        val answerRoll = die.nextInt(9)
+        val answerIsIncorrect = answerRoll == 7
+        val staysInPenaltyBox = placeRoll % 2 == 0
+
+        println("$name is the current player")
+        println("They have rolled a $placeRoll")
+
+        if (isInPenaltyBox && staysInPenaltyBox && answerIsIncorrect) {
+            println("$name is not getting out of the penalty box")
+            println("Question was incorrectly answered")
+            println("$name was sent to the penalty box")
+            return
+        } else if (isInPenaltyBox && staysInPenaltyBox) {
+            println("$name is not getting out of the penalty box")
+            return
+        } else if (isInPenaltyBox) {
+            println("$name is getting out of the penalty box")
+        }
+
+        calculateAndSetPlace(placeRoll)
+
+        println("$name's new location is $place")
+        println("The category is ${Category.countOffByPlace(place)}")
+        println(Category.nextQuestionByPlace(place))
+
+        if (answerIsIncorrect) {
+
+            isInPenaltyBox = true
+
+//            return
+        } else {
+            coins++
+        }
+
+
+        // preserve bug to match with golden master
+//        println()
+//        println("$name now has $coins Gold Coins.")
+
+        println(buildTurnSummary(answerIsIncorrect))
+        return
+    }
+
+    private fun buildTurnSummary(answerIsIncorrect: Boolean): String {
+        if (answerIsIncorrect) {
+            return "Question was incorrectly answered\n" +
+                    "$name was sent to the penalty box"
+        }
+
+        return "Answer was ${if (isInPenaltyBox) "correct" else "corrent"}!!!!\n" +
+                "$name now has $coins Gold Coins."
     }
 }
 
