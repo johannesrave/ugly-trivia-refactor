@@ -1,10 +1,11 @@
 package com.adaptionsoft.games.trivia.runner
 
 import com.adaptionsoft.games.uglytrivia.Game
+import com.adaptionsoft.games.uglytrivia.Player
 import java.util.*
 
 object GameRunner {
-    var notAWinner: Boolean = false
+    var isGameInProgress: Boolean = false
 }
 
 fun main(args: Array<String>) {
@@ -15,9 +16,9 @@ fun main(args: Array<String>) {
     // seed in game übergeben
     val game = Game()
 
-    aGame.add("Chet")
-    aGame.add("Pat")
-    aGame.add("Sue")
+    game.addPlayer(Player("Chet"))
+    game.addPlayer(Player("Pat"))
+    game.addPlayer(Player("Sue"))
 
 
     // es wird gewürfelt und roll() läuft durch
@@ -33,12 +34,12 @@ fun main(args: Array<String>) {
         game.roll(rand.nextInt(5) + 1)
 
         if (rand.nextInt(9) == 7) {
-            GameRunner.notAWinner = aGame.wrongAnswer()
+            GameRunner.isGameInProgress = game.isWrongAnswer()
         } else {
-            GameRunner.notAWinner = aGame.wasCorrectlyAnswered()
+            GameRunner.isGameInProgress = game.isCorrectAnswer()
         }
 
 
-    } while (GameRunner.notAWinner)
+    } while (GameRunner.isGameInProgress)
 
 }
