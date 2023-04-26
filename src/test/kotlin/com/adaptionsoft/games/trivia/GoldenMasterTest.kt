@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class GoldenMasterTest {
-    private val numberOfMasters = 10
+    private val numberOfMasters = 100
 
     @Test
     @Disabled("Golden Masters should be created once and then be left alone.")
