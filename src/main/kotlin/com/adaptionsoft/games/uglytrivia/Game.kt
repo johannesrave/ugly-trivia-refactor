@@ -2,10 +2,9 @@ package com.adaptionsoft.games.uglytrivia
 
 import java.util.*
 
-class Game(val seed: Int = Random().nextInt()) {
+class Game {
     private var players = ArrayList<Player>()
     private var places = IntArray(6)
-    private var purses = IntArray(6)
 
     private var popQuestions = LinkedList<Any>()
     private var scienceQuestions = LinkedList<Any>()
@@ -14,34 +13,34 @@ class Game(val seed: Int = Random().nextInt()) {
 
     private var currentPlayerIndex = 0
     private var isGettingOutOfPenaltyBox: Boolean = false
+    private val die = Random()
 
     init {
         for (i in 0..49) {
-            popQuestions.addLast("Pop Question " + i)
-            scienceQuestions.addLast("Science Question " + i)
-            sportsQuestions.addLast("Sports Question " + i)
-            rockQuestions.addLast("Rock Question " + i)
+            popQuestions.addLast("Pop Question $i")
+            scienceQuestions.addLast("Science Question $i")
+            sportsQuestions.addLast("Sports Question $i")
+            rockQuestions.addLast("Rock Question $i")
         }
-
-
     }
+
+    fun setDieSeed(seed: Long) {
+        die.setSeed(seed)
+    }
+
     fun addPlayer(player: Player) {
         players.add(player)
-        places[howManyPlayers()] = 0
-        purses[howManyPlayers()] = 0
+        places[players.size] = 0
 
         println(player.name + " was added")
         println("They are player number " + players.size)
     }
 
-    private fun howManyPlayers(): Int {
-        return players.size
-    }
-
-    fun roll(roll: Int) {
+    fun takeTurn(): Boolean {
+        val roll = die.nextInt(5) + 1
         var currentPlayer = players[currentPlayerIndex]
         println(currentPlayer.name + " is the current player")
-        println("They have rolled a " + roll)
+        println("They have rolled a $roll")
 
         if (currentPlayer.isInPenaltyBox) {
             if (roll % 2 != 0) {
@@ -77,6 +76,15 @@ class Game(val seed: Int = Random().nextInt()) {
             askQuestion()
         }
 
+        return when {
+            die.nextInt(9) == 7 -> {
+                isWrongAnswer()
+            }
+
+            else -> {
+                isCorrectAnswer()
+            }
+        }
     }
 
     private fun askQuestion() {
@@ -104,19 +112,21 @@ class Game(val seed: Int = Random().nextInt()) {
     }
 
     fun isCorrectAnswer(): Boolean {
-        var currentPlayer = players[currentPlayerIndex]
+        val currentPlayer = players[currentPlayerIndex]
         if (currentPlayer.isInPenaltyBox) {
             if (isGettingOutOfPenaltyBox) {
                 println("Answer was correct!!!!")
-                purses[currentPlayerIndex]++
+                currentPlayer.purse++
                 println(
                     players[currentPlayerIndex].name
                             + " now has "
-                            + purses[currentPlayerIndex]
+                            + currentPlayer.purse
+//                            + purses[currentPlayerIndex]
                             + " Gold Coins."
                 )
 
-                val winner = didPlayerWin()
+//                val winner = didPlayerWin()
+                val winner = currentPlayer.purse != 6
                 currentPlayerIndex++
                 if (currentPlayerIndex == players.size) currentPlayerIndex = 0
 
@@ -131,15 +141,16 @@ class Game(val seed: Int = Random().nextInt()) {
         } else {
 
             println("Answer was corrent!!!!")
-            purses[currentPlayerIndex]++
+            currentPlayer.purse++
             println(
                 players[currentPlayerIndex].name
                         + " now has "
-                        + purses[currentPlayerIndex]
+                        + currentPlayer.purse
+//                        + purses[currentPlayerIndex]
                         + " Gold Coins."
             )
 
-            val winner = didPlayerWin()
+            val winner = currentPlayer.purse != 6
             currentPlayerIndex++
             if (currentPlayerIndex == players.size) currentPlayerIndex = 0
 
@@ -158,9 +169,6 @@ class Game(val seed: Int = Random().nextInt()) {
         return true
     }
 
-    private fun didPlayerWin(): Boolean {
-        return purses[currentPlayerIndex] != 6
-    }
 }
 
-data class Player(val name: String, var isInPenaltyBox: Boolean = false)
+data class Player(val name: String, var isInPenaltyBox: Boolean = false, var purse: Int = 0)
