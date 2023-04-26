@@ -8,10 +8,10 @@ class Game {
     internal var purses = IntArray(6)
     internal var inPenaltyBox = BooleanArray(6)
 
-    internal var popQuestions = LinkedList<Any>()
-    internal var scienceQuestions = LinkedList<Any>()
-    internal var sportsQuestions = LinkedList<Any>()
-    internal var rockQuestions = LinkedList<Any>()
+    private var popQuestions = LinkedList<Any>()
+    private var scienceQuestions = LinkedList<Any>()
+    private var sportsQuestions = LinkedList<Any>()
+    private var rockQuestions = LinkedList<Any>()
 
     internal var currentPlayer = 0
     internal var isGettingOutOfPenaltyBox: Boolean = false
@@ -21,22 +21,13 @@ class Game {
             popQuestions.addLast("Pop Question " + i)
             scienceQuestions.addLast("Science Question " + i)
             sportsQuestions.addLast("Sports Question " + i)
-            rockQuestions.addLast(createRockQuestion(i))
+            rockQuestions.addLast("Rock Question " + i)
         }
+
+
     }
-
-    fun createRockQuestion(index: Int): String {
-        return "Rock Question " + index
-    }
-
-    fun isPlayable(): Boolean {
-        return howManyPlayers() >= 2
-    }
-
-    fun add(playerName: String): Boolean {
-
-
-        players.add(playerName)
+    fun addPlayer(player: Player) {
+        players.add(player)
         places[howManyPlayers()] = 0
         purses[howManyPlayers()] = 0
         inPenaltyBox[howManyPlayers()] = false
@@ -46,7 +37,7 @@ class Game {
         return true
     }
 
-    fun howManyPlayers(): Int {
+    private fun howManyPlayers(): Int {
         return players.size
     }
 
@@ -62,9 +53,11 @@ class Game {
                 places[currentPlayer] = places[currentPlayer] + roll
                 if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12
 
-                println(players[currentPlayer].toString()
-                        + "'s new location is "
-                        + places[currentPlayer])
+                println(
+                    players[currentPlayerIndex].name
+                            + "'s new location is "
+                            + places[currentPlayerIndex]
+                )
                 println("The category is " + currentCategory())
                 askQuestion()
             } else {
@@ -77,9 +70,11 @@ class Game {
             places[currentPlayer] = places[currentPlayer] + roll
             if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12
 
-            println(players[currentPlayer].toString()
-                    + "'s new location is "
-                    + places[currentPlayer])
+            println(
+                players[currentPlayerIndex].name
+                        + "'s new location is "
+                        + places[currentPlayerIndex]
+            )
             println("The category is " + currentCategory())
             askQuestion()
         }
@@ -114,11 +109,13 @@ class Game {
         if (inPenaltyBox[currentPlayer]) {
             if (isGettingOutOfPenaltyBox) {
                 println("Answer was correct!!!!")
-                purses[currentPlayer]++
-                println(players[currentPlayer].toString()
-                        + " now has "
-                        + purses[currentPlayer]
-                        + " Gold Coins.")
+                purses[currentPlayerIndex]++
+                println(
+                    players[currentPlayerIndex].name
+                            + " now has "
+                            + purses[currentPlayerIndex]
+                            + " Gold Coins."
+                )
 
                 val winner = didPlayerWin()
                 currentPlayer++
@@ -135,11 +132,13 @@ class Game {
         } else {
 
             println("Answer was corrent!!!!")
-            purses[currentPlayer]++
-            println(players[currentPlayer].toString()
-                    + " now has "
-                    + purses[currentPlayer]
-                    + " Gold Coins.")
+            purses[currentPlayerIndex]++
+            println(
+                players[currentPlayerIndex].name
+                        + " now has "
+                        + purses[currentPlayerIndex]
+                        + " Gold Coins."
+            )
 
             val winner = didPlayerWin()
             currentPlayer++

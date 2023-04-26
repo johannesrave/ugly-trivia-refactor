@@ -27,7 +27,7 @@ tasks.test {
     testLogging {
         exceptionFormat = TestExceptionFormat.FULL
         events = mutableSetOf(TestLogEvent.FAILED)
-        showStandardStreams = true
+//        showStandardStreams = true
     }
 }
 

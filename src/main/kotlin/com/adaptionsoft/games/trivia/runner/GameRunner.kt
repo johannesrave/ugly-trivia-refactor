@@ -8,18 +8,29 @@ object GameRunner {
 }
 
 fun main(args: Array<String>) {
-    val aGame = Game()
+    val rand = Random()
+    rand.setSeed(args[0].toLong())
+
+
+    // seed in game übergeben
+    val game = Game()
 
     aGame.add("Chet")
     aGame.add("Pat")
     aGame.add("Sue")
 
-    val rand = Random()
-    rand.setSeed(args[0].toLong())
+
+    // es wird gewürfelt und roll() läuft durch
+    // es wird NOCHMAL gewürfelt, davon abhängig ist die antwort falsch oder wahr
+    // abhängig von der antwort endet das spiel
+
+
+    // was ich hier gerne lesen würde:
+    // while (aGame.isNotFinished()) aGame.makeTurn()
 
     do {
 
-        aGame.roll(rand.nextInt(5) + 1)
+        game.roll(rand.nextInt(5) + 1)
 
         if (rand.nextInt(9) == 7) {
             GameRunner.notAWinner = aGame.wrongAnswer()
