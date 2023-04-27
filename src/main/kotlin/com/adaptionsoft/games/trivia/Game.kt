@@ -29,12 +29,12 @@ class Game {
         generateSequence { Pair(die.nextInt(5) + 1, die.nextInt(9)) }.iterator()
 }
 
-data class Player(val name: String, var wasInPenaltyBox: Boolean = false, var coins: Int = 0, var place: Int = 0) {
+data class Player(val name: String, var inPenaltyBox: Boolean = false, var coins: Int = 0, var place: Int = 0) {
     fun takeTurn(placeRoll: Int, answerRoll: Int) {
         val answerIsCorrect = answerRoll != 7
         val canLeavePenaltyBox = placeRoll % 2 != 0
-        val leavesPenaltyBox = wasInPenaltyBox && canLeavePenaltyBox
-        val staysInPenaltyBox = wasInPenaltyBox && !canLeavePenaltyBox
+        val leavesPenaltyBox = inPenaltyBox && canLeavePenaltyBox
+        val staysInPenaltyBox = inPenaltyBox && !canLeavePenaltyBox
 
         if (!staysInPenaltyBox) {
             countOffPlaceByRoll(placeRoll)
@@ -42,12 +42,11 @@ data class Player(val name: String, var wasInPenaltyBox: Boolean = false, var co
             if (answerIsCorrect) {
                 coins++
             } else {
-                wasInPenaltyBox = true
+                inPenaltyBox = true
             }
         }
 
         println(buildTurnSummary(answerIsCorrect, leavesPenaltyBox, staysInPenaltyBox, placeRoll))
-        return
     }
 
     private fun countOffPlaceByRoll(roll: Int) {
@@ -79,7 +78,7 @@ data class Player(val name: String, var wasInPenaltyBox: Boolean = false, var co
                 "\n" + Category.nextQuestionByPlace(place)
 
         if (answerIsCorrect) {
-            summary += "\nAnswer was ${if (wasInPenaltyBox) "correct" else "corrent"}!!!!" +
+            summary += "\nAnswer was ${if (inPenaltyBox) "correct" else "corrent"}!!!!" +
                     "\n$name now has $coins Gold Coins."
         } else {
             summary += "\nQuestion was incorrectly answered" +
