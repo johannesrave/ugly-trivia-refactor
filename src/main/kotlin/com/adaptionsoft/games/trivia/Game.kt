@@ -13,7 +13,8 @@ class Game {
         do {
             player = players.next()
             val (placeRoll, answerRoll) = diceRolls.next()
-            player.takeTurn(placeRoll, answerRoll)
+            val turnSummary = player.takeTurn(placeRoll, answerRoll)
+            println(turnSummary)
         } while (player.coins < 6)
     }
 
@@ -30,7 +31,7 @@ class Game {
 }
 
 data class Player(val name: String, var inPenaltyBox: Boolean = false, var coins: Int = 0, var place: Int = 0) {
-    fun takeTurn(placeRoll: Int, answerRoll: Int) {
+    fun takeTurn(placeRoll: Int, answerRoll: Int): TurnSummary {
         val answerIsCorrect = answerRoll != 7
         val canLeavePenaltyBox = placeRoll % 2 != 0
         val leavesPenaltyBox = inPenaltyBox && canLeavePenaltyBox
@@ -46,43 +47,46 @@ data class Player(val name: String, var inPenaltyBox: Boolean = false, var coins
             }
         }
 
-        println(buildTurnSummary(answerIsCorrect, leavesPenaltyBox, staysInPenaltyBox, placeRoll))
+        return TurnSummary(this, answerIsCorrect, leavesPenaltyBox, staysInPenaltyBox, placeRoll)
     }
 
     private fun countOffPlaceByRoll(roll: Int) {
         place = (place + roll) % 12
     }
+}
 
-    private fun buildTurnSummary(
-        answerIsCorrect: Boolean,
-        leftPenaltyBox: Boolean,
-        staysInPenaltyBox: Boolean,
-        placeRoll: Int
-    ): String {
-        var summary = "$name is the current player" +
+data class TurnSummary(
+    val player: Player,
+    val answerIsCorrect: Boolean,
+    val leavesPenaltyBox: Boolean,
+    val staysInPenaltyBox: Boolean,
+    val placeRoll: Int
+) {
+    override fun toString(): String {
+        var summary = "${player.name} is the current player" +
                 "\nThey have rolled a $placeRoll"
 
         if (staysInPenaltyBox) {
-            summary += "\n$name is not getting out of the penalty box"
+            summary += "\n${player.name} is not getting out of the penalty box"
             if (!answerIsCorrect) {
                 summary += "\nQuestion was incorrectly answered"
-                summary += "\n$name was sent to the penalty box"
+                summary += "\n${player.name} was sent to the penalty box"
             }
             return summary.trimStart()
         }
-        if (leftPenaltyBox) {
-            summary += "\n$name is getting out of the penalty box"
+        if (leavesPenaltyBox) {
+            summary += "\n${player.name} is getting out of the penalty box"
         }
-        summary += "\n$name's new location is $place" +
-                "\nThe category is ${Category.countOffByPlace(place)}" +
-                "\n" + Category.nextQuestionByPlace(place)
+        summary += "\n${player.name}'s new location is ${player.place}" +
+                "\nThe category is ${Category.countOffByPlace(player.place)}" +
+                "\n" + Category.nextQuestionByPlace(player.place)
 
         if (answerIsCorrect) {
-            summary += "\nAnswer was ${if (inPenaltyBox) "correct" else "corrent"}!!!!" +
-                    "\n$name now has $coins Gold Coins."
+            summary += "\nAnswer was ${if (player.inPenaltyBox) "correct" else "corrent"}!!!!" +
+                    "\n${player.name} now has ${player.coins} Gold Coins."
         } else {
             summary += "\nQuestion was incorrectly answered" +
-                    "\n$name was sent to the penalty box"
+                    "\n${player.name} was sent to the penalty box"
         }
 
         return summary.trimStart()
