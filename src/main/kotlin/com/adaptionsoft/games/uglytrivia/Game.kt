@@ -2,47 +2,42 @@ package com.adaptionsoft.games.uglytrivia
 
 import java.util.*
 
-class Game(private val die: Random = Random()) {
-    private var players = emptyList<Player>().toMutableList()
-    private var currentPlayerIndex = -1
-
-    fun run() {
-        Category.reset()
+class Game {
+    fun playWith(die: Random = Random(), vararg playerNames: String) {
+        Category.resetAllQuestions()
+        announcePlayers(playerNames.toList())
+        val players = setupPlayers(playerNames.toList())
+        val diceRolls = setupDiceRolls(die)
 
         var player: Player
         do {
-            player = getNextPlayer()
-            player.takeTurn(die)
+            player = players.next()
+            val (placeRoll, answerRoll) = diceRolls.next()
+            player.takeTurn(placeRoll, answerRoll)
         } while (player.coins < 6)
     }
 
-    private fun getNextPlayer(): Player {
-        currentPlayerIndex = ++currentPlayerIndex % players.size
-        return players[currentPlayerIndex]
+    private fun announcePlayers(playerNames: List<String>) = playerNames
+        .forEachIndexed { i, name -> println("$name was added\nThey are player number ${i + 1}") }
+
+    private fun setupPlayers(playerNames: List<String>): Iterator<Player> {
+        val players = playerNames.map { name -> Player(name) }
+        return generateSequence(0) { (it + 1) % playerNames.size }.map { i -> players[i] }.iterator()
     }
 
-    fun addPlayer(playerName: String) {
-        players.add(Player(playerName))
-        println("$playerName was added")
-        println("They are player number ${players.size}")
-    }
+    private fun setupDiceRolls(die: Random): Iterator<Pair<Int, Int>> =
+        generateSequence { Pair(die.nextInt(5) + 1, die.nextInt(9)) }.iterator()
 }
 
 data class Player(val name: String, var wasInPenaltyBox: Boolean = false, var coins: Int = 0, var place: Int = 0) {
-    private fun calculateAndSetPlace(roll: Int) {
-        place = (place + roll) % 12
-    }
-
-    fun takeTurn(die: Random) {
-        val placeRoll = die.nextInt(5) + 1
-        val answerRoll = die.nextInt(9)
+    fun takeTurn(placeRoll: Int, answerRoll: Int) {
         val answerIsCorrect = answerRoll != 7
         val canLeavePenaltyBox = placeRoll % 2 != 0
         val leavesPenaltyBox = wasInPenaltyBox && canLeavePenaltyBox
         val staysInPenaltyBox = wasInPenaltyBox && !canLeavePenaltyBox
 
         if (!staysInPenaltyBox) {
-            calculateAndSetPlace(placeRoll)
+            countOffPlaceByRoll(placeRoll)
 
             if (answerIsCorrect) {
                 coins++
@@ -53,6 +48,10 @@ data class Player(val name: String, var wasInPenaltyBox: Boolean = false, var co
 
         println(buildTurnSummary(answerIsCorrect, leavesPenaltyBox, staysInPenaltyBox, placeRoll))
         return
+    }
+
+    private fun countOffPlaceByRoll(roll: Int) {
+        place = (place + roll) % 12
     }
 
     private fun buildTurnSummary(
@@ -98,7 +97,7 @@ enum class Category {
     var questions = questionCards.listIterator()
 
     companion object {
-        fun reset() = values().forEach { it.questions = it.questionCards.listIterator() }
+        fun resetAllQuestions() = values().forEach { it.questions = it.questionCards.listIterator() }
 
         fun countOffByPlace(place: Int): Category = Category.values().find { place % 4 == it.ordinal }
             ?: throw IllegalStateException()

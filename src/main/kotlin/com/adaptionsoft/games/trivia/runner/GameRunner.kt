@@ -5,13 +5,8 @@ import java.util.*
 
 fun main(args: Array<String>) {
 
-    val die = Random(args[0].toLong())
-    val game = Game(die)
-
-    game.addPlayer("Chet")
-    game.addPlayer("Pat")
-    game.addPlayer("Sue")
-
-    game.run()
+    val loadedDie = Random(args[0].toLong())
+    val game = Game()
+    game.playWith(loadedDie, "Chet", "Pat", "Sue")
 }
 
