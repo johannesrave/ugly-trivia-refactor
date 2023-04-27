@@ -1,6 +1,5 @@
 package com.adaptionsoft.games.trivia
 
-import com.adaptionsoft.games.trivia.runner.main
 import org.junit.jupiter.api.Disabled
 import java.io.File
 import java.io.PrintStream

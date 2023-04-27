@@ -1,6 +1,5 @@
-package com.adaptionsoft.games.trivia.runner
+package com.adaptionsoft.games.trivia
 
-import com.adaptionsoft.games.uglytrivia.Game
 import java.util.*
 
 fun main(args: Array<String>) {
