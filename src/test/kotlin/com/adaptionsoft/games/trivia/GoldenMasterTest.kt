@@ -5,7 +5,7 @@ import java.io.File
 import java.io.PrintStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class GoldenMasterTest {
     private val numberOfMasters = 100
@@ -28,26 +28,26 @@ class GoldenMasterTest {
 
         val mismatches = mutableListOf<GoldenMasterMismatch>()
 
-        repeat(numberOfMasters) { randomSeed ->
+        repeat(numberOfMasters) { fileIndex ->
 
-            val masterName = "testData/${randomSeed.toString().padStart(2, '0')}_goldenMaster.txt"
-            val testResultName = "testData/${randomSeed.toString().padStart(2, '0')}_testResult.txt"
+            val masterName = "testData/${fileIndex.toString().padStart(2, '0')}_goldenMaster.txt"
+            val testResultName = "testData/${fileIndex.toString().padStart(2, '0')}_testResult.txt"
 
             ConsoleCaptor(testResultName).use {
-                main(arrayOf(randomSeed.toString()))
+                main(arrayOf(fileIndex.toString()))
             }
 
             val masterLines = File(masterName).readLines()
             val testResultLines = File(testResultName).readLines()
 
 
-            assertEquals(masterLines.size, testResultLines.size, "Size mismatch in file $randomSeed")
+            assertEquals(masterLines.size, testResultLines.size, "Size mismatch in file $fileIndex")
             masterLines.forEachIndexed { lineIndex, _ ->
                 if (masterLines[lineIndex] == testResultLines[lineIndex]) return@forEachIndexed
 
                 mismatches.add(
                     GoldenMasterMismatch(
-                        randomSeed,
+                        fileIndex,
                         lineIndex,
                         masterLines[lineIndex],
                         testResultLines[lineIndex]
@@ -56,15 +56,12 @@ class GoldenMasterTest {
             }
         }
 
-        mismatches.forEach { (fileIndex, lineIndex, masterLine, mismatchedLine) ->
-            assertNull(
-                Pair(fileIndex, lineIndex),
-                "\n" +
-                        "There is a mismatch in GoldenMaster $fileIndex on line $lineIndex:\n" +
+        assertTrue(mismatches.isEmpty(),
+            mismatches.joinToString("\n") { (fileIndex, lineIndex, masterLine, mismatchedLine) ->
+                "There is a mismatch in GoldenMaster $fileIndex on line $lineIndex:\n" +
                         "MASTER: $masterLine\n" +
                         "RESULT: $mismatchedLine\n"
-            )
-        }
+            })
     }
 
     data class GoldenMasterMismatch(
